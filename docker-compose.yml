@@ -1,0 +1,80 @@
+# Apache avec PHP :
+# Port 8080
+# Utilise le volume "www"
+# Lié à mysql
+apache:
+    image: eboraas/apache-php
+    ports:
+        - 8080:80
+    volumes:
+        - C:/www/:/var/www/html/
+    environment:
+        - ALLOW_OVERRIDE=true
+    links:
+        - mysql:db
+
+
+
+# Nginx seul :
+# Port 80
+# Utilise le volume "www"
+# Les fichiers de configuration sont dans le conf.d
+# Lié à php
+nginx:
+    image: nginx:latest
+    ports: 
+        - 80:80
+    volumes_from:
+        - www
+    volumes:
+        - ./nginx/conf.d/:/etc/nginx/conf.d/
+    links:
+        - php
+
+
+
+# PHP 7 en mode FPM, principalement pour Nginx
+# Expose le port 9000 aux conteneurs liés
+# Les fichiers de configuration sont dans le conf.d
+# Lié à mysql
+php:
+    build: ./php/
+    expose:
+        - 9000
+    volumes_from:
+        - www
+    volumes:
+        - ./php/conf.d/upload.ini:/usr/local/etc/php/conf.d/upload.ini
+    links:
+        - mysql:db
+
+
+
+# MySQL
+# Utilise le volume "data"
+mysql:
+    image: mysql:latest
+    volumes_from:
+        - data
+    environment:
+        - MYSQL_ROOT_PASSWORD=root
+
+
+
+
+
+# Les "conteneurs de données" ou encore les "data containers"
+# Ils ne font rien, car ils doivent simplement exister pour être accessible.
+# C'est utile pour factoriser l'accès à ces répertoires
+
+www:
+    image: php:7.0-fpm
+    volumes:
+        - C:/www/:/www/
+    command: "true"
+
+data:
+    image: mysql:latest
+    volumes:
+        - ./mysql/data/:/var/lib/mysql/
+    command: "true"
