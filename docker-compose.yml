@@ -21,7 +21,7 @@ apache:
 # Les fichiers de configuration sont dans le conf.d
 # Lié à php
 nginx:
-    image: nginx:latest
+    build: ./nginx/
     ports: 
         - 80:80
     volumes_from:
@@ -56,6 +56,8 @@ mysql:
     image: mysql:latest
     volumes_from:
         - data
+    volumes:
+        - ./mysql/conf.d/:/etc/mysql/conf.d/
     environment:
         - MYSQL_ROOT_PASSWORD=root
 
@@ -68,7 +70,7 @@ mysql:
 # C'est utile pour factoriser l'accès à ces répertoires
 
 www:
-    image: php:7.0-fpm
+    image: php:7-fpm
     volumes:
         - C:/www/:/www/
     command: "true"
